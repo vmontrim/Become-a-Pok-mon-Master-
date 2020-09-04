@@ -1,180 +1,82 @@
+import random as rd
 class Pokemon:
-    def __init__(self, name, level, pType, koStatus = False):
-        self.name = name
-        self.level = level
-        self.pType = pType
-        self.max_health = level * 4 + 100
-        self.curr_health = self.max_health
-        self.KO = koStatus
-    
-    # method for taking damage
-    def lose_health(self, damage):
-        self.curr_health -= damage
-        print("{name} has lost {damage} health; current health is {hp} hit points".format(name=self.name, damage=damage, hp=self.curr_health))
-    
-    #method for gaining HP
-    def gain_health(self, healing):
-        self.curr_health += healing
-        print("{name} has gained {healing} points of health, current health is {health}".format(name=self.name, healing=healing, health=self.curr_health))
+  def __init__(self, name, level, types, health, ko = False):
+    self.name = name
+    self.level = level 
+    self.types = types
+    self.health = health
+    self.max_health = level
+    self.ko = ko
 
-    #method for Knocking Out a pokemon
-    def knock_out(self):
-        self.KO = True
+  def __repr__(self):
+      return "Pokemon info, name: {}, level: {}, type: {}, health: {}".format(self.name, self.level, self.types, self.health)
 
-    #method for reviving a pokemon from a KO
-    def revive(self):
-        self.KO = False
+  def lose_health(self, damage):
+      if damage >= self.health:
+        print(f"Your pokemon {self.name} is knocked out")
+      else:
+        self.health -= damage 
+        print(f"{self.name} lost {damage} health and remaining health {self.health}") 
+      
+  def gain_health(self, gain):
+      self.health += gain
+      print(f"{self.name} gain {gain} health")
+      print(f"{self.name} now has {self.health} health")
 
-    #Attack a pokemon. Argument is a pokemon object
-    def attack(self, other_pokemon):
-        damage = 0 
-        print("{attacker} ATTACKS {defender}".format(attacker=self.name, defender=other_pokemon.name))
-        if self.pType == 'Fire':
-            if other_pokemon.pType == 'Water':
-                damage = (10 * self.level) / 2
-                print("Attack not very affective!")
-            
-            elif other_pokemon.pType == 'Grass':
-                damage = (10 * self.level) * 2
-                print("Attack very affectiv!")
-
-            elif other_pokemon.pType == 'Electric':
-                damage = 10 * self.level
-                print("Attack somewhat affective!")
-            
-            else:
-                damage = 10 * self.level
-                print("Attack somewhat affective!")
-        
-        elif self.pType == 'Water':
-            if other_pokemon.pType == 'Fire':
-                damage = (10 * self.level) * 2
-                print("Attack very affectiv!")
-
-            elif other_pokemon.pType == 'Grass':
-                damage = (10 * self.level) / 2
-                print("Attack not very affective!")
-            
-            elif other_pokemon.pType == 'Electric':
-                damage = 10 * self.level
-                print("Attack somewhat affective!")
-            
-            else:
-                damage = 10 * self.level
-                print("Attack somewhat affective!")
-        
-        elif self.pType == 'Grass':
-            if other_pokemon.pType == 'Fire':
-                damage = (10 * self.level) / 2
-                print("Attack not very affective!")
-
-            elif other_pokemon.pType == 'Water':
-                damage = (10 * self.level) * 2
-                print("Attack very affectiv!")
-            
-            elif other_pokemon.pType == 'Electric':
-                damage = 10 * self.level
-                print("Attack somewhat affective!")
-            
-            else:
-                damage = 10 * self.level
-                print("Attack somewhat affective!")
-        
-        elif self.pType == 'Electric':
-            if other_pokemon.pType == 'Fire':
-                damage = (10 * self.level)
-                print("Attack somewhat affective!")
-            
-            elif other_pokemon.pType == 'Grass':
-                damage = (10 * self.level) / 2
-                print("Attack not very affective!")
-            
-            elif other_pokemon.pType == 'Water':
-                damage = 10 * self.level * 2
-                print("Attack very affectiv!")
-            
-            else:
-                damage = 10 * self.level
-                print("Attack somewhat affective!")
-        
-        else:
-            print("Error: PokemonType ERROR")
-        
-        other_pokemon.lose_health(damage)
-
-# Defining specific pokemon subclasses
-class Pikachu(Pokemon):
-    def __init__(self, level = 1):
-        super().__init__("Pikachu", level, "Electric")
-
-class Charmander(Pokemon):
-    def __init__(self, level = 1):
-        super().__init__("Charmander", level, "Fire")
-
-class Squirtel(Pokemon):
-    def __init__(self, level = 1):
-        super().__init__("Squirtel", level, "Water")
-
-class Bulbasaur(Pokemon):
-    def __init__(self, level = 1):
-        super().__init__("Bulbasaur", level, "Grass")
-
-#Trainer Class Definition
+ 
+  def attack(self, other_pokemon):
+      dmg = 0
+      for a in self.types:
+          for b in other_pokemon.types:
+              if (a == 'fire' and b == 'grass') or (a == 'grass' and b == 'water') or (a == 'water' and b == 'fire'):
+                  dmg += 10
+              elif (a == 'grass' and b == 'fire') or (a == 'fire' and b == 'water') or (a == 'water' and b == 'grass'):
+                  dmg -= 10
+      damage = self.level * dmg + (rd.randint(0, 5) * 10)
+      other_pokemon.health = max(other_pokemon.health - damage, 0) 
+      print("{} hits {} and made {} damage!".format(self.name, other_pokemon.name, round(damage, 0)))             
+      if other_pokemon.health == 0:
+          other_pokemon.ko = True
+          print(f'{other_pokemon.name} is ko')
+  
+       
 class Trainer:
-    def __init__(self, poke_list, num_potions, name ):
-        self.name = name
-        self.poke_list = poke_list
-        self.potions = num_potions
-        self.current_poke = 0
-    
-    def __repr__(self):
-        # Prints the name of the trainer, the pokemon they currently have, and the current active pokemon.
-        print("The trainer {name} has the following pokemon".format(name = self.name))
-        for pokemon in self.poke_list:
-            print(pokemon.name)
-        return "The current active pokemon is {name}".format(name = self.poke_list[self.current_poke].name)
-    # use a potion on current pokemon
-    def use_potion(self):
-        print("{you} use potion on {poke}".format(you=self.name, poke=self.poke_list[self.current_poke].name))
-        self.poke_list[self.current_poke].gain_health(10)
-        self.potions -= 1
-    
-    def attack_trainer(self, target):
-        #set up pokemon that are involved in the fight
-        atk_poke = self.poke_list[self.current_poke]
-        def_poke = target.poke_list[target.current_poke]
-        #notify player fight is happening
-        print("{self} attacks {targ} with {poke}".format(self=self.name, targ=target.name, poke=atk_poke.name))
-        #pokemon fight
-        atk_poke.attack(def_poke)
-    
-    #Switch current pokemon
-    def switch_poke(self):
-        self.current_poke += 1
-        if self.poke_list[self.current_poke].KO:
-            self.current_poke += 1
-        print("{trainer} switched to {name}".format(trainer=self.name, name=self.poke_list[self.current_poke].name))
+   def __init__(self, name, pokemons, potions, current_pokemon):
+       self.name = name
+       self.pokemons = pokemons
+       self.potions = potions
+       self.current_pokemon = 0
+
+   def potion(self):
+       if self.potions > 0:
+           self.pokemons[self.current_pokemon].gain_health(10)
+           self.potions -= 10
+           print(f'{self.current_pokemon} gain + 10 health')
+       else:
+           print('no potions lefft')
+  
+   def attack_trainer(self, other_trainer):
+        self.pokemons[self.current_pokemon]
+      
 
 
 
 
-
-pika = Pikachu(2)
-char = Charmander(2)
-squirt = Squirtel(2)
-bulba = Bulbasaur(5)
-mander = Charmander(6)
+trainer1 = Trainer('belekas',['ghr', 'dg', 'dj'], 100, 'dj')
+trainer2 = Trainer('bs',['ghr', 'dg'], 100, 'dg')
 
 
+print(Pokemon('pika', 1, 'fire', 100))
 
-trainer1 = Trainer([pika, char, squirt], 3, "Vito")
-trainer2 = Trainer([bulba, mander],5, "Blekas")
+pika = Pokemon('pika', 1, 'fire', 100)
+eevee = Pokemon('eevee', 1, 'grass',100)
+
+
+pika.lose_health(70)
+pika.gain_health(50)
+
+pika.attack(eevee)
+
 
 trainer1.attack_trainer(trainer2)
-trainer2.attack_trainer(trainer1)
 
-trainer1.use_potion()
-trainer2.switch_poke()
-
-print(trainer1)
-print(trainer2)
